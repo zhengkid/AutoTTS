@@ -1,0 +1,12 @@
+Method,Acc,Cost,Std_Acc,Description,config,_beta,warm_up,min_complete,conf_thresh,conf_thresh_soft,act_thresh,n_init,max_branch_use,abandon_patience,sleep_period,lock_thresh,gap_factor,trace_recorder
+OptimalController,17.67,217865,0,optimal_controller | config={'beta': 0.4},{'beta': 0.4},0.4,6,4,0.89,0.6599999999999999,0.74,4,28,7,4,5,2,<method.MethodTraceRecorder object at 0x7f7b52d3aa20>
+OptimalController,16.77,140588,0,optimal_controller | config={'beta': 0.2},{'beta': 0.2},0.2,4,3,0.87,0.63,0.72,3,16,6,4,4,1,<method.MethodTraceRecorder object at 0x7f7bb4e6c620>
+OptimalController,18.13,257170,0,optimal_controller | config={'beta': 0.5},{'beta': 0.5},0.5,6,4,0.9,0.6749999999999999,0.75,5,34,8,4,5,2,<method.MethodTraceRecorder object at 0x7f7af88e1e80>
+OptimalController,15.23,55940,0,optimal_controller | config={'beta': 0.0},{'beta': 0.0},0.0,3,2,0.85,0.6,0.7,2,4,4,3,4,1,<method.MethodTraceRecorder object at 0x7f7b2e6b2090>
+OptimalController,15.83,101531,0,optimal_controller | config={'beta': 0.1},{'beta': 0.1},0.1,4,2,0.86,0.615,0.71,3,10,5,3,4,1,<method.MethodTraceRecorder object at 0x7f7b92fb4da0>
+OptimalController,20.5,421285,0,optimal_controller | config={'beta': 0.9},{'beta': 0.9},0.9,9,6,0.94,0.735,0.7899999999999999,7,58,11,6,6,3,<method.MethodTraceRecorder object at 0x7f7bbed17a70>
+OptimalController,17.17,180163,0,optimal_controller | config={'beta': 0.3},{'beta': 0.3},0.3,5,3,0.88,0.645,0.73,4,22,6,4,5,2,<method.MethodTraceRecorder object at 0x7f7b5ba35040>
+OptimalController,20.63,463203,0,optimal_controller | config={'beta': 1.0},{'beta': 1.0},1.0,10,6,0.95,0.75,0.7999999999999999,8,64,12,6,6,3,<method.MethodTraceRecorder object at 0x7f7a820f8da0>
+OptimalController,18.6,290336,0,optimal_controller | config={'beta': 0.6},{'beta': 0.6},0.6,7,4,0.9099999999999999,0.69,0.76,6,40,9,5,5,2,<method.MethodTraceRecorder object at 0x7f7a51190fe0>
+OptimalController,20.03,377943,0,optimal_controller | config={'beta': 0.8},{'beta': 0.8},0.8,9,5,0.9299999999999999,0.72,0.78,7,52,10,5,6,3,<method.MethodTraceRecorder object at 0x7f7cb90ba090>
+OptimalController,19.37,327627,0,optimal_controller | config={'beta': 0.7},{'beta': 0.7},0.7,8,5,0.9199999999999999,0.705,0.7699999999999999,6,46,10,5,5,2,<method.MethodTraceRecorder object at 0x7f79f48dcd40>

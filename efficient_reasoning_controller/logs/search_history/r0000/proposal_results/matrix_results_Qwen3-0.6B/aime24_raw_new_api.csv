@@ -1,0 +1,12 @@
+Method,Acc,Cost,Std_Acc,Description,config,_beta,warm_up,lock_streak,prune_patience,conf_thresh,max_cohort,maturity_boost,min_locked_frac,trace_recorder
+OptimalController,3.1,6595,0,optimal_controller | config={'beta': 0.1},{'beta': 0.1},0.1,3,2,4,0.863,7,1.3,0.43000000000000005,<method.MethodTraceRecorder object at 0x7fc0058ea960>
+OptimalController,3.17,7893,0,optimal_controller | config={'beta': 0.2},{'beta': 0.2},0.2,3,2,4,0.876,10,1.6,0.46,<method.MethodTraceRecorder object at 0x7fc04a0e3080>
+OptimalController,3.1,4964,0,optimal_controller | config={'beta': 0.0},{'beta': 0.0},0.0,2,2,3,0.85,4,1.0,0.4,<method.MethodTraceRecorder object at 0x7fbfe6f06b70>
+OptimalController,5.6,36523,0,optimal_controller | config={'beta': 0.6},{'beta': 0.6},0.6,6,3,6,0.9279999999999999,21,2.8,0.5800000000000001,<method.MethodTraceRecorder object at 0x7fbff9c33500>
+OptimalController,5.17,22141,0,optimal_controller | config={'beta': 0.3},{'beta': 0.3},0.3,4,3,4,0.889,12,1.9,0.49,<method.MethodTraceRecorder object at 0x7fc004385970>
+OptimalController,5.43,27846,0,optimal_controller | config={'beta': 0.4},{'beta': 0.4},0.4,4,3,5,0.902,15,2.2,0.52,<method.MethodTraceRecorder object at 0x7fbfea331f40>
+OptimalController,5.53,32679,0,optimal_controller | config={'beta': 0.5},{'beta': 0.5},0.5,5,3,6,0.915,18,2.5,0.55,<method.MethodTraceRecorder object at 0x7fbff913d8e0>
+OptimalController,5.7,41675,0,optimal_controller | config={'beta': 0.7},{'beta': 0.7},0.7,6,3,6,0.941,24,3.0999999999999996,0.61,<method.MethodTraceRecorder object at 0x7fbffed6c110>
+OptimalController,6.27,91388,0,optimal_controller | config={'beta': 0.9},{'beta': 0.9},0.9,7,4,8,0.967,29,3.7,0.67,<method.MethodTraceRecorder object at 0x7fbfe22186b0>
+OptimalController,6.33,101075,0,optimal_controller | config={'beta': 1.0},{'beta': 1.0},1.0,8,4,8,0.98,32,4.0,0.7,<method.MethodTraceRecorder object at 0x7fbfd61a04a0>
+OptimalController,6.1,81192,0,optimal_controller | config={'beta': 0.8},{'beta': 0.8},0.8,7,4,7,0.954,26,3.4000000000000004,0.64,<method.MethodTraceRecorder object at 0x7fbfcbc23ec0>

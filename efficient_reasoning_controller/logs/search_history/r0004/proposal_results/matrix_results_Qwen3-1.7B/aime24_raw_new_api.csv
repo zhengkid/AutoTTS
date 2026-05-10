@@ -1,0 +1,12 @@
+Method,Acc,Cost,Std_Acc,Description,config,_beta,n_init,max_branch_use,warm_up,abandon_patience,T_ema,ema_alpha,conf_thresh,delta_slack,burst_aligned,widen_burst,trend_thresh,min_complete,trace_recorder
+OptimalController,65.27,106309,0,optimal_controller | config={'beta': 0.1},{'beta': 0.1},0.1,3,10,3,4,3,0.66,0.862,0.037,1,1,0.037,2,<method.MethodTraceRecorder object at 0x7f299799e3c0>
+OptimalController,68.5,276267,0,optimal_controller | config={'beta': 0.5},{'beta': 0.5},0.5,5,34,6,8,5,0.5,0.91,0.025,2,2,0.025,4,<method.MethodTraceRecorder object at 0x7f29b574ce00>
+OptimalController,69.9,393653,0,optimal_controller | config={'beta': 0.8},{'beta': 0.8},0.8,7,52,8,10,7,0.38,0.946,0.016,3,3,0.016,4,<method.MethodTraceRecorder object at 0x7f2985a3d130>
+OptimalController,70.27,469868,0,optimal_controller | config={'beta': 0.9},{'beta': 0.9},0.9,7,58,9,11,7,0.34,0.958,0.013,3,4,0.013,5,<method.MethodTraceRecorder object at 0x7f29d64b7e30>
+OptimalController,70.37,499094,0,optimal_controller | config={'beta': 1.0},{'beta': 1.0},1.0,8,64,10,12,8,0.3,0.97,0.01,3,4,0.01,5,<method.MethodTraceRecorder object at 0x7f292c356810>
+OptimalController,67.73,202972,0,optimal_controller | config={'beta': 0.3},{'beta': 0.3},0.3,4,22,4,6,4,0.58,0.886,0.031,2,2,0.031,3,<method.MethodTraceRecorder object at 0x7f2978573500>
+OptimalController,68.2,242448,0,optimal_controller | config={'beta': 0.4},{'beta': 0.4},0.4,4,28,5,7,4,0.54,0.898,0.028,2,2,0.028,3,<method.MethodTraceRecorder object at 0x7f296ff5b6b0>
+OptimalController,60.07,55710,0,optimal_controller | config={'beta': 0.0},{'beta': 0.0},0.0,2,4,2,3,2,0.7,0.85,0.04,1,1,0.04,2,<method.MethodTraceRecorder object at 0x7f29322ef6b0>
+OptimalController,66.9,159806,0,optimal_controller | config={'beta': 0.2},{'beta': 0.2},0.2,3,16,4,5,3,0.62,0.874,0.034,1,2,0.034,3,<method.MethodTraceRecorder object at 0x7f2945381d00>
+OptimalController,69.37,333278,0,optimal_controller | config={'beta': 0.6},{'beta': 0.6},0.6,6,40,7,8,6,0.46,0.922,0.022,2,3,0.022,4,<method.MethodTraceRecorder object at 0x7f29d64a2180>
+OptimalController,69.6,360256,0,optimal_controller | config={'beta': 0.7},{'beta': 0.7},0.7,6,46,8,9,6,0.42,0.934,0.019,2,3,0.019,4,<method.MethodTraceRecorder object at 0x7f283ecc92e0>

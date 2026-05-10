@@ -1,0 +1,13 @@
+{
+  "source_dir": "/beacon-projects/heng-bio-llm/tong/projects/automatic_reasoning_controller_discovery/efficient_reasoning_controller/workspace/code_base/training_results",
+  "copied_files": [
+    "matrix_results_Qwen3-0.6B/aime24_raw_new_api.csv",
+    "matrix_results_Qwen3-0.6B/aime24_trace_new_api.jsonl",
+    "matrix_results_Qwen3-1.7B/aime24_raw_new_api.csv",
+    "matrix_results_Qwen3-1.7B/aime24_trace_new_api.jsonl",
+    "matrix_results_Qwen3-4B/aime24_raw_new_api.csv",
+    "matrix_results_Qwen3-4B/aime24_trace_new_api.jsonl",
+    "matrix_results_Qwen3-8B/aime24_raw_new_api.csv",
+    "matrix_results_Qwen3-8B/aime24_trace_new_api.jsonl"
+  ]
+}

@@ -1,0 +1,184 @@
+You are a proposer for training-free reasoning controller discovery in a 2D probing environment.
+
+Your goal is not to solve the reasoning task directly.
+Your goal is to discover and implement a reusable controller algorithm over offline branch-probing traces.
+
+Reasoning-time control is formulated as a 2D optimization problem:
+- width = how many branches to explore
+- depth = how far each active branch has been probed
+
+For each question, offline data provides a set of branches.
+Each branch contains:
+- a sequence of intermediate probe answers
+- a total branch token budget
+- a final answer
+
+Because branch lengths differ, the 2D probing state is irregular rather than a perfectly aligned matrix.
+
+Environment API (on the `question` object passed to `solve`):
+- `question.probe_new()` -> `(answer, branch_index, is_finish)`
+  starts a new reasoning branch, lets it decode for a fixed token chunk, and returns that branch's current answer, its stable `branch_index`, and whether the branch has already finished in this call.
+- `question.probe_more(branch_index)` -> `(answer, is_finish)`
+  continues an already activated branch for another fixed token chunk, and returns its updated answer plus whether the branch is now finished.
+- `question.get_new_branch_final_answer()` -> `answer`
+  consumes one whole fresh branch at full token cost and returns only its final answer (no intermediate probing). Use this for full-read style baselines such as majority voting / ASC / ESC.
+- `question.get_seq_and_total_tokens()` -> `(seq_tokens, total_tokens)`
+  returns cumulative cost accounting for the current question. Use for diagnostics only; do not rely on it as an oracle stop signal.
+
+Helper utilities available in `code_base/method.py` (prefer reusing them, not re-implementing):
+- `_safe_probe_new(question)`, `_safe_probe_more(question, index)`, `_safe_full_read(question)`
+  swallow `IndexError`/`ValueError` when a branch is exhausted and return `None` instead of raising.
+- `_majority_answer(answers)`, `_vote_stats(answers)`, `_beta_majority_confidence(top1, top2)`, `_weighted_vote(pairs)`
+  standard voting / confidence primitives already used by ASC and Parallel-Probe.
+
+Important:
+- Both `probe_new()` and `probe_more(index)` represent actual reasoning progress, not just answer inspection.
+- Each action advances decoding by a fixed chunk of tokens before exposing the branch's current answer.
+- Early probed answers are often unreliable: shallow branch predictions may be incorrect, unstable, or misleading, and only become accurate after sufficient reasoning depth.
+- `get_new_branch_final_answer()` spends the branch's full budget in one call, so mixing it with `probe_new/probe_more` inside the same controller changes cost accounting semantics; pick one style per controller unless the mixing is intentional.
+
+Design the controller around these observable primitive operations only.
+Do not use hidden future information, oracle signals, dataset-specific shortcuts, or hardcoded answers.
+
+Objectives:
+1. maximize answer accuracy
+2. minimize total token cost
+
+Accuracy is the primary objective.
+Among controllers with similar accuracy, prefer lower total cost.
+The goal is to improve held-out accuracy-efficiency behavior, not merely search-set numbers.
+
+The target is a reusable controller algorithm that maps the current 2D probing state to decisions such as:
+- whether to start a new branch
+- which active branch or branches to probe next
+- whether to continue widening exploration
+- whether to stop probing
+- how to aggregate answers at termination
+
+Implementation constraints:
+- Directly edit `OptimalController` in `code_base/method.py`. `code_base/method.py` is reset from `code_base/method.template.py` at the start of every round, so your patch must be self-contained within `method.py` and must not rely on out-of-file state.
+- Keep the implementation executable by `code_base/eval.py` without interface or runtime errors. In particular:
+  - subclass `LLMDesignedMethod`, keep `NAME`, `__init__(self, config: Optional[Dict[str, Any]] = None)`, and `solve(self, question) -> Optional[str]` compatible with the existing call site in `data_loader.ModelandTask.evaluate`.
+  - accept tunable arguments either as explicit kwargs or via the `config` dict; do not change the constructor signature that `eval.py` uses (currently `OptimalController(config={{...}})`).
+- Reuse shared helpers and `ASCMethod` / `ESCMethod` / `Parallel_Probe` infrastructure that already sits in `method.py` whenever it is natural; do not duplicate or rewrite those seed classes.
+- Keep the patch focused; avoid broad refactoring. Do not modify shared helpers, the seed methods, the evaluator, data loader, datasets, or any framework files.
+- Read other files only for context.
+
+Tracing expectation (align with the existing seeds):
+- All seed methods in `method.py` expose per-question traces via `MethodTraceRecorder` with a small, consistent surface: `self.trace_recorder`, `_reset_trace()`, `_trace_step(event, goal, step_input, step_output, state, decision)`, `get_last_trace()`, and `solve_with_trace(question)`.
+- `data_loader.ModelandTask.evaluate` detects `hasattr(function, "get_last_trace")` and writes the recorded trace to the per-round `training_results/matrix_results_<Model>/<dataset>_trace_new_api.jsonl`. Your `OptimalController` should implement the same surface so its behavior is diagnosable alongside the seeds.
+- Use `_reset_trace()` at the top of `solve`, emit a `start` event after reset, one event per decision point (e.g., `init_branches`, `forward`, `update_states`, `prune`, `terminate_check`, `finish`), and make sure a single terminal `finish` event is recorded on every return path.
+- Keep per-step trace payloads small and JSON-serializable (primitive types, short lists); avoid dumping full branch histories at every step.
+
+Fair comparison and budget requirement:
+- The controller should support a maximum branch budget of `max_branch = 64`, matching the strong seed baselines whenever applicable (e.g., `ASCMethod(max_samples=64)`, `ESCMethod(max_samples=64, ...)`, `Parallel_Probe(num_chains=64, ...)`).
+- Treat `max_branch = 64` as an available budget ceiling, not as a fixed branch count that must always be used, and not as a smaller artificial cap used to win by restriction.
+- A meaningful improvement means using the same budget ceiling more effectively through adaptive control.
+
+Adaptive control requirement:
+- The controller should be genuinely adaptive under the shared `max_branch = 64` ceiling.
+- It should adaptively allocate budget across both width and depth based on the current 2D probing state.
+- It should decide when to widen exploration, when to deepen selected branches, when to stop widening, and when to terminate altogether.
+- Avoid mostly fixed probing schedules or nearly fixed expansion-and-stop templates.
+- A controller that adaptively widens but then uniformly deepens all active branches is not fully sufficient; depth allocation should also be adaptive whenever appropriate.
+
+Budget-family requirement:
+- The controller may expose a single high-level budget parameter, e.g. `beta`, that controls budget aggressiveness.
+- `beta` should not hardcode an exact token target for each question.
+- Instead, `beta` should induce a monotonic shift from conservative to aggressive budget use while the controller still adaptively allocates budget based on the current 2D probing state.
+- `beta` should serve as the primary knob for tracing an accuracy-cost frontier under the shared `max_branch = 64` ceiling.
+- Accept `beta` through `config={{"beta": ...}}` so that `eval.py` sweeps like `for beta in betas: OptimalController(config={{"beta": beta}})` work unchanged.
+
+Conservative-anchor requirement for `beta`:
+- The `beta` scale should have a clear conservative anchor.
+- In particular, when `beta = 1`, the controller should behave conservatively rather than aggressively:
+  - it should be reluctant to terminate based on shallow or newly formed consensus,
+  - it should avoid overly aggressive early pruning,
+  - it should prefer gathering reasonably mature evidence before making irreversible stop/prune decisions,
+  - and it should be allowed to approach near-full use of the shared budget ceiling when the state remains ambiguous.
+- Lower-budget behavior for smaller effective spending should come mainly from more selective width/depth allocation, not from brittle premature stopping rules.
+
+Monotonicity requirement:
+- As `beta` increases, the controller should become systematically more willing to widen exploration, deepen uncertain branches, defer termination, and in general spend more of the available budget.
+- As `beta` decreases, the controller may become more conservative in spending, but should not rely on overly brittle shallow-consensus stopping or aggressive early exits that noticeably damage accuracy.
+
+Coverage requirement:
+- By varying `beta`, it should be possible to trace a meaningful frontier from low-budget regimes up to near-full use of the shared `max_branch = 64` budget ceiling.
+- In the high-`beta` regime, the controller should be capable of behaving close to a full-budget, accuracy-first policy rather than remaining artificially frugal.
+- Prefer a coherent budget-controlled controller family over many loosely related controller variants.
+
+Single-knob schedule requirement:
+- All behavior-critical hyperparameters of the controller (e.g. warm_up, prune_patience, stability window `T`, confidence threshold, window size, any per-branch budget cap, per-step probe burst, termination thresholds) must be deterministic functions of `beta` computed inside `OptimalController`. Given a single `beta` value, the controller must be fully determined — no additional tunable knobs are exposed to `eval.py`.
+- `config` should only carry `beta` (and at most a few fixed structural constants such as the `max_branch = 64` ceiling that are not tuned between runs). Do not accept multiple independent hyperparameter fields alongside `beta`.
+- Implement the mapping as a named helper such as `def _schedule(self, beta) -> dict` that returns every internal hyperparameter value as a function of `beta`, and call it once in `__init__`. This keeps the schedule explicit, reviewable, and easy to replace.
+- The schedule should be smooth and monotonic with `beta` wherever the Monotonicity requirement applies (e.g. warm_up, T, patience, per-branch cap should be non-decreasing in `beta`; early-stop thresholds should be non-increasing in aggressiveness as `beta` grows). Avoid piecewise logic with many hand-placed breakpoints; prefer a small number of simple analytic forms (linear, power, sigmoid, clipped ramps) with a handful of fixed structural constants.
+- You are encouraged to tune the `beta -> hyperparameter` schedule design with a local sandbox: prototype alternative schedule forms, plot the induced accuracy-cost frontier across the evaluated `beta` grid against the seed baselines, and keep the simplest schedule that achieves a robust frontier. Do not leave the sandbox-only code in `OptimalController`; the committed class should contain only the final schedule plus the controller logic.
+- Any design-time fitting of the schedule must use only material already allowed by this prompt (prior proposals, seed traces, the offline probing environment). Do not peek at gold answers or held-out splits.
+
+History-aware proposing:
+- Seed baseline source code lives directly in `code_base/method.py` (and the reset template `code_base/method.template.py`):
+  `ASCMethod` (sequential full-read + Beta-majority confidence early stop),
+  `ESCMethod` (windowed full-read + unanimity early stop),
+  `Parallel_Probe` (parallel chains with warm-up, off-track pruning, stable-majority termination).
+- Reference benchmarks and per-step traces for the seeds are at `code_base/history/seed_algorithms/matrix_results_<Model>/<dataset>_raw_new_api.csv` and `code_base/history/seed_algorithms/matrix_results_<Model>/<dataset>_trace_new_api.jsonl`. Inspect them to learn the current accuracy-cost frontier and the shape of per-question traces for each baseline family.
+- Prior proposals from previous rounds are archived at `code_base/history/rNNNN_<timestamp>_<uid>/`, each containing:
+  - `method.py` — the exact `OptimalController` snapshot that was evaluated that round,
+  - `proposal_results/matrix_results_<Model>/*.csv` — per-method accuracy/cost numbers,
+  - `proposal_results/matrix_results_<Model>/*_trace_new_api.jsonl` — per-question traces,
+  - plus any manifest files.
+  The round index grows over time; read the latest few rounds first to understand what has just been tried.
+- Before proposing a new controller, inspect both the prior proposals (with their traces) and the seed baselines. Use them to understand what has already been tried, what failed, what currently works well, and what the current performance frontier looks like.
+
+Novelty requirement:
+- The proposal must be meaningfully different from the seed algorithms, especially `ASCMethod`, `ESCMethod`, and `Parallel_Probe`.
+- Do not simply reproduce, lightly reweight, or trivially combine existing algorithms.
+- Small threshold tuning, slight stage reordering, or cosmetic variants do not count as sufficient novelty.
+- If building on prior ideas, introduce a clear new mechanism that substantively changes the controller's decision logic.
+- However, novelty is not the goal by itself: prefer a novel mechanism with a plausible path to robust held-out performance, not a complicated but brittle idea.
+
+Robustness and parameter discipline:
+- Fewer hyperparameters is strictly better. Each additional tunable parameter adds a degree of freedom that can be implicitly overfit to the search set and degrade held-out robustness, so the default stance is to introduce as few parameters as possible and to delete any parameter that does not demonstrably change behavior.
+- Prefer controller families with few, interpretable, behavior-critical parameters.
+- Keep the number of independently tuned behavior-critical parameters as small as possible.
+- Prefer a controller family governed by one high-level budget parameter (e.g. `beta`) plus at most a few fixed structural constants.
+- Avoid many tightly coupled thresholds, patience counters, or brittle stage-specific hyperparameters unless clearly necessary.
+- Do not cherry-pick a fragile best operating point.
+- Prefer stable operating regions and smooth budget-performance curves over sharp search-set optima.
+- Do not expose tunable knobs other than `beta`. Every behavior-critical hyperparameter must be a function of `beta` (see the Single-knob schedule requirement); if you believe an additional externally tunable parameter is unavoidable, explicitly justify why it cannot be folded into the `beta` schedule before introducing it.
+- Small gains that require many sensitive parameters are not desirable; a slightly weaker controller with fewer hyperparameters is preferred over a slightly stronger one that needs careful multi-knob tuning.
+
+Performance requirement:
+- The proposed controller should aim to outperform the seed algorithms in the overall accuracy-efficiency tradeoff.
+- Desirable outcomes include:
+  - similar answer accuracy with fewer total tokens, or
+  - better answer accuracy under a similar token budget.
+- Do not sacrifice too much accuracy for small token savings.
+- The goal is a novel controller that is competitive with strong seed algorithms and plausibly stronger on held-out accuracy-efficiency behavior.
+
+Do not redesign the evaluation framework.
+
+Required workflow:
+1. Inspect the current codebase and understand the environment abstraction (`code_base/data_loader.py`, `code_base/eval.py`).
+2. Inspect `code_base/method.py` (and `code_base/method.template.py`) to read the seed implementations `ASCMethod`, `ESCMethod`, `Parallel_Probe`, the shared helpers, and the `OptimalController` stub you must fill in.
+3. Inspect `code_base/history/seed_algorithms/matrix_results_<Model>/` for the seed accuracy-cost frontier and per-step traces.
+4. Inspect the latest few `code_base/history/rNNNN_<ts>_<uid>/` folders for prior `OptimalController` proposals (`method.py` snapshot) and their `proposal_results/` (CSV + trace JSONL).
+5. Summarize the core ideas of prior proposals and seed algorithms.
+6. Identify what has already been tried, what failed, and what would count as genuinely different.
+7. Propose a new controller that is novel, adaptive, and plausibly stronger in held-out accuracy-efficiency behavior.
+8. Prefer a coherent budget-controlled controller family, ideally governed by `beta`, over many independent thresholds.
+9. Implement the controller by directly editing `OptimalController` in `code_base/method.py`. Wire the `MethodTraceRecorder` / `_trace_step` / `solve_with_trace` surface in the same style as the seeds so traces are emitted into `training_results/matrix_results_<Model>/<dataset>_trace_new_api.jsonl`.
+10. Ensure constructor, signature, inheritance/interface behavior, and return behavior remain compatible with `code_base/eval.py` (which currently instantiates `OptimalController(config={{"beta": beta}})`).
+11. Keep the patch focused and avoid unnecessary changes.
+12. Summarize:
+   - the controller idea
+   - whether history was used (which rounds and which seed traces)
+   - what lessons were extracted from prior proposals and seed algorithms
+   - what makes this controller genuinely different from `ASCMethod`, `ESCMethod`, and `Parallel_Probe`
+   - why this controller is adaptive in width-depth budget allocation
+   - how it uses the shared `max_branch = 64` budget ceiling
+   - whether and how `beta` is used to provide full budget coverage from low budget to near-full budget
+   - the exact `beta -> hyperparameter` schedule (analytic form per hyperparameter, fixed structural constants, monotonicity direction) and how it was tuned in the sandbox (what alternatives were tried, why the committed form was selected)
+   - how parameter complexity was controlled (in particular, confirmation that no tunable knob other than `beta` is exposed)
+   - how tracing was instrumented (events emitted, terminal `finish` coverage, payload size discipline)
+   - why this proposal may improve the held-out accuracy / total-cost tradeoff
+   - possible risks or failure modes

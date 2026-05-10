@@ -1,0 +1,12 @@
+Method,Acc,Cost,Std_Acc,Description,config,_beta,warm_up,min_complete,conf_thresh,n_init,max_branch_use,abandon_patience,trace_recorder
+OptimalController,68.03,240581,0,optimal_controller | config={'beta': 0.5},{'beta': 0.5},0.5,6,4,0.9099999999999999,5,34,8,<method.MethodTraceRecorder object at 0x7eff4ea09940>
+OptimalController,68.6,264892,0,optimal_controller | config={'beta': 0.6},{'beta': 0.6},0.6,7,4,0.9219999999999999,6,40,9,<method.MethodTraceRecorder object at 0x7efed5aed1c0>
+OptimalController,69.03,288125,0,optimal_controller | config={'beta': 0.7},{'beta': 0.7},0.7,8,5,0.9339999999999999,6,46,10,<method.MethodTraceRecorder object at 0x7eff08d46000>
+OptimalController,69.27,321315,0,optimal_controller | config={'beta': 0.8},{'beta': 0.8},0.8,8,5,0.946,7,52,11,<method.MethodTraceRecorder object at 0x7eff3822b9b0>
+OptimalController,65.57,108007,0,optimal_controller | config={'beta': 0.1},{'beta': 0.1},0.1,3,2,0.862,3,10,6,<method.MethodTraceRecorder object at 0x7efdc80cee40>
+OptimalController,60.1,56023,0,optimal_controller | config={'beta': 0.0},{'beta': 0.0},0.0,2,2,0.85,2,4,5,<method.MethodTraceRecorder object at 0x7efec7701640>
+OptimalController,67.87,187665,0,optimal_controller | config={'beta': 0.3},{'beta': 0.3},0.3,4,3,0.886,4,22,7,<method.MethodTraceRecorder object at 0x7eff4052ff80>
+OptimalController,66.8,152700,0,optimal_controller | config={'beta': 0.2},{'beta': 0.2},0.2,4,3,0.874,3,16,6,<method.MethodTraceRecorder object at 0x7eff0fc2d880>
+OptimalController,69.57,340519,0,optimal_controller | config={'beta': 0.9},{'beta': 0.9},0.9,9,6,0.958,7,58,11,<method.MethodTraceRecorder object at 0x7eff18f0bd40>
+OptimalController,68.0,224850,0,optimal_controller | config={'beta': 0.4},{'beta': 0.4},0.4,5,4,0.898,4,28,8,<method.MethodTraceRecorder object at 0x7eff645ad160>
+OptimalController,69.9,373599,0,optimal_controller | config={'beta': 1.0},{'beta': 1.0},1.0,10,6,0.97,8,64,12,<method.MethodTraceRecorder object at 0x7efdab131c70>
