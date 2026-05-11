@@ -882,19 +882,14 @@ efficient_reasoning_controller/workspace/code_base/history/seed_algorithms/
             Zhang, Sheng and Liu, Rui and Dai, Runpeng and Chen, Ruibo and
             Liu, Chenxi and Xiong, Tianyi and Wu, Xidong and Zhang, Hongming and
             Huang, Heng},
-  journal = {arXiv preprint},
+  journal={arXiv preprint arXiv:2605.08083},
   year    = {2026}
 }
 
-@misc{zheng2026parallelprobe,
-  title         = {Parallel-Probe: Towards Efficient Parallel Thinking via 2D Probing},
-  author        = {Zheng, Tong and Huang, Chengsong and Dai, Runpeng and He, Yun and
-                   Liu, Rui and Ni, Xin and Bao, Huiwen and Wang, Kaishen and
-                   Zhu, Hongtu and Huang, Jiaxin and Huang, Furong and Huang, Heng},
-  year          = {2026},
-  eprint        = {2602.03845},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
-  url           = {https://arxiv.org/abs/2602.03845}
+@article{zheng2026parallel,
+  title={Parallel-Probe: Towards Efficient Parallel Thinking via 2D Probing},
+  author={Zheng, Tong and Huang, Chengsong and Dai, Runpeng and He, Yun and Liu, Rui and Ni, Xin and Bao, Huiwen and Wang, Kaishen and Zhu, Hongtu and Huang, Jiaxin and others},
+  journal={arXiv preprint arXiv:2602.03845},
+  year={2026}
 }
 ```
