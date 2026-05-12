@@ -812,19 +812,24 @@ python eval/eval.py
 
 Discovery evaluation inside the research codebase uses the same logic under [`workspace/code_base/eval.py`](efficient_reasoning_controller/workspace/code_base/eval.py); it writes to `code_base/training_results/` instead. Use **`eval/`** for the standalone “evaluate what we ship” layout.
 
-### Path B — Run discovery yourself (`workspace/`)
+### Way B — Run discovery yourself (`workspace/`)
 
 Use this to reproduce or extend the **automated search loop** (costs LLM calls; evaluation steps remain replay-only).
 
 1. **Environment.** Finish [Install](#install) (Conda + nvm/Node + `claude-agent-sdk` + API exports). Authenticate the Claude Code CLI (`claude login`) as needed.
-2. **Launch the workflow:**
+2. **Set up History**: Download History from huggingface  (as exec trace is very large)
+```bash
+huggingface-cli download AutoTTS/history --local-dir ./history
+cp -r ./history efficient_reasoning_controller/workspace/code_base/   # replace history directory with the full hisotry 
+```
+4. **Launch the workflow:**
 
 ```bash
 cd efficient_reasoning_controller/workspace
 bash controller_search/run_workflow.sh
 ```
 
-3. **Optional tuning** via environment variables (defaults in [`run_workflow.sh`](efficient_reasoning_controller/workspace/controller_search/run_workflow.sh)):
+5. **Optional tuning** via environment variables (defaults in [`run_workflow.sh`](efficient_reasoning_controller/workspace/controller_search/run_workflow.sh)):
 
 ```bash
 export WORKFLOW_PROPOSER_BACKEND=claude   # claude or codex
