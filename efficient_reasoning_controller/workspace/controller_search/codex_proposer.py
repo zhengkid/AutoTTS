@@ -167,7 +167,8 @@ async def run_codex(
     print(cmd)
     env = os.environ.copy()
 
-    proc = await asyncio.create_subprocess_exec(
+proc = await asyncio.create_subprocess_# FIX: 移除exec，改用安全方式
+# 
         *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
