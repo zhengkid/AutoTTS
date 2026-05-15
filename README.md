@@ -881,14 +881,11 @@ efficient_reasoning_controller/workspace/code_base/history/seed_algorithms/
 ## Citation
 
 ```bibtex
-@article{zheng2026autotts,
-  title  = {LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling},
-  author = {Zheng, Tong and Liu, Haolin and Huang, Chengsong and Bao, Huiwen and
-            Zhang, Sheng and Liu, Rui and Dai, Runpeng and Chen, Ruibo and
-            Liu, Chenxi and Xiong, Tianyi and Wu, Xidong and Zhang, Hongming and
-            Huang, Heng},
+@article{zheng2026llms,
+  title={LLMs Improving LLMs: Agentic Discovery for Test-Time Scaling},
+  author={Zheng, Tong and Liu, Haolin and Huang, Chengsong and Bao, Huiwen and Zhang, Sheng and Liu, Rui and Dai, Runpeng and Chen, Ruibo and Liu, Chenxi and Xiong, Tianyi and others},
   journal={arXiv preprint arXiv:2605.08083},
-  year    = {2026}
+  year={2026}
 }
 
 @article{zheng2026parallel,
